@@ -1,0 +1,146 @@
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+// Function prototypes
+void displayBoard(const vector<vector<char>>& board);
+bool makeMove(vector<vector<char>>& board, int slot, char player);
+bool checkWin(const vector<vector<char>>& board, char player);
+bool checkDraw(const vector<vector<char>>& board);
+void resetBoard(vector<vector<char>>& board);
+
+int main() {
+    // Initialize a 3x3 board with slot numbers 1-9 as placeholders
+    vector<vector<char>> board = {
+        {'1', '2', '3'},
+        {'4', '5', '6'},
+        {'7', '8', '9'}
+    };
+
+    char currentPlayer = 'X';
+    bool gameRunning = true;
+
+    cout << "=================================\n";
+    cout << "   Welcome to C++ Tic-Tac-Toe    \n";
+    cout << "=================================\n";
+
+    while (gameRunning) {
+        displayBoard(board);
+        
+        int choice;
+        cout << "Player " << currentPlayer << ", enter a slot (1-9): ";
+        cin >> choice;
+
+        // Validate input and update board
+        if (cin.fail() || choice < 1 || choice > 9 || !makeMove(board, choice, currentPlayer)) {
+            cin.clear(); // Clear error flag
+            cin.ignore(10000, '\n'); // Discard invalid input
+            cout << "Invalid move! That slot is either taken or out of bounds. Try again.\n";
+            continue; 
+        }
+
+        // Check for a win
+        if (checkWin(board, currentPlayer)) {
+            displayBoard(board);
+            cout << "Congratulations! Player " << currentPlayer << " wins!\n";
+            
+            // Replay logic
+            char reply;
+            cout << "Do you want to play again? (y/n): ";
+            cin >> reply;
+            if (reply == 'y' || reply == 'Y') {
+                resetBoard(board);
+                currentPlayer = 'X'; // X always starts
+            } else {
+                gameRunning = false;
+            }
+        } 
+        // Check for a draw
+        else if (checkDraw(board)) {
+            displayBoard(board);
+            cout << "It's a draw!\n";
+            
+            char reply;
+            cout << "Do you want to play again? (y/n): ";
+            cin >> reply;
+            if (reply == 'y' || reply == 'Y') {
+                resetBoard(board);
+                currentPlayer = 'X';
+            } else {
+                gameRunning = false;
+            }
+        } 
+        // Switch players if game continues
+        else {
+            currentPlayer = (currentPlayer == 'X') ? 'O' : 'X';
+        }
+    }
+
+    cout << "\nThank you for playing! Goodbye.\n";
+    return 0;
+}
+
+// Dynamically draws the current state of the board
+void displayBoard(const vector<vector<char>>& board) {
+    cout << "\n";
+    cout << " " << board[0][0] << " | " << board[0][1] << " | " << board[0][2] << " \n";
+    cout << "---|---|---\n";
+    cout << " " << board[1][0] << " | " << board[1][1] << " | " << board[1][2] << " \n";
+    cout << "---|---|---\n";
+    cout << " " << board[2][0] << " | " << board[2][1] << " | " << board[2][2] << " \n";
+    cout << "\n";
+}
+
+// Maps 1-9 input to 2D array row/col indexes and updates it
+bool makeMove(vector<vector<char>>& board, int slot, char player) {
+    // Convert 1-9 slot to row and col indices
+    int row = (slot - 1) / 3;
+    int col = (slot - 1) % 3;
+
+    // Check if the slot is still an unchosen number
+    if (board[row][col] != 'X' && board[row][col] != 'O') {
+        board[row][col] = player;
+        return true;
+    }
+    return false;
+}
+
+// Scans rows, columns, and diagonals for 3 matching marks
+bool checkWin(const vector<vector<char>>& board, char player) {
+    // Check rows and columns
+    for (int i = 0; i < 3; i++) {
+        if ((board[i][0] == player && board[i][1] == player && board[i][2] == player) ||
+            (board[0][i] == player && board[1][i] == player && board[2][i] == player)) {
+            return true;
+        }
+    }
+    // Check diagonals
+    if ((board[0][0] == player && board[1][1] == player && board[2][2] == player) ||
+        (board[0][2] == player && board[1][1] == player && board[2][0] == player)) {
+        return true;
+    }
+    return false;
+}
+
+// Checks if all spaces are filled without a winner
+bool checkDraw(const vector<vector<char>>& board) {
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            // If any numerical placeholder remains, the board isn't full
+            if (board[i][j] != 'X' && board[i][j] != 'O') {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+// Reverts board back to default numerical layout
+void resetBoard(vector<vector<char>>& board) {
+    board = {
+        {'1', '2', '3'},
+        {'4', '5', '6'},
+        {'7', '8', '9'}
+    };
+}
